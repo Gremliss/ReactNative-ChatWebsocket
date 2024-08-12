@@ -7,6 +7,10 @@ import {
   Button,
   ScrollView,
 } from "react-native";
+import { Colors } from '@/constants/Colors';
+import { useColorScheme } from '@/hooks/useColorScheme';
+
+// const colorScheme = useColorScheme();
 
 export default function App() {
   const [serverState, setServerState] = React.useState<string>("Loading...");
@@ -15,6 +19,9 @@ export default function App() {
   const [inputFieldEmpty, setInputFieldEmpty] = React.useState<boolean>(true);
   const [serverMessages, setServerMessages] = React.useState<string[]>([]);
   var ws = React.useRef(new WebSocket("ws://192.168.0.236:8080/")).current;
+
+  const colorScheme = useColorScheme() || 'light';
+  const styles = createStyles(colorScheme);
 
   React.useEffect(() => {
     const serverMessagesList: string[] = [];
@@ -27,8 +34,8 @@ export default function App() {
       setDisableButton(true);
     };
     ws.onerror = (e: any) => {
-  setServerState(e.message || "An error occurred.");
-};
+      setServerState(e.message || "An error occurred.");
+    };
     ws.onmessage = (e) => {
       serverMessagesList.push(e.data);
       setServerMessages([...serverMessagesList]);
@@ -44,22 +51,29 @@ export default function App() {
       <View
         style={{
           height: 30,
-          backgroundColor: "#eeceff",
+          backgroundColor: Colors[colorScheme].statusBG,
           padding: 5,
         }}
       >
-        <Text>{serverState}</Text>
+        <Text
+        style={{
+          color: Colors[colorScheme].text,
+        }}
+        >{serverState}</Text>
       </View>
       <View
         style={{
-          backgroundColor: "#ffeece",
+          backgroundColor: Colors[colorScheme].backgroundChat,
           padding: 5,
           flexGrow: 1,
         }}
       >
         <ScrollView>
           {serverMessages.map((item, ind) => {
-            return <Text key={ind}>{item}</Text>;
+            return <Text
+        style={{
+          color: Colors[colorScheme].text,
+        }} key={ind}>{item}</Text>;
           })}
         </ScrollView>
       </View>
@@ -74,8 +88,10 @@ export default function App() {
             borderColor: "black",
             flexGrow: 1,
             padding: 5,
+            color: Colors[colorScheme].text,
           }}
           placeholder={"Add Message"}
+          placeholderTextColor={Colors[colorScheme].text}
           onChangeText={(text) => {
             setMessageText(text);
             setInputFieldEmpty(text.length > 0 ? false : true);
@@ -91,11 +107,14 @@ export default function App() {
     </View>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#ecf0f1",
-    paddingTop: 30,
-    padding: 8,
-  },
-});
+
+const createStyles = (color: keyof typeof Colors) => {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: Colors[color].background,
+      paddingTop: 30,
+      padding: 8,
+    },
+  });
+};
