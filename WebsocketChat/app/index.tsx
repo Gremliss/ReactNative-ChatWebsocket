@@ -13,12 +13,14 @@ import { store } from "./redux/store";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { setName } from "./redux/userSlice";
 import { RootState } from "./redux/store";
+import { increament, decrement } from "./redux/counterSlice";
 
 function MainComponent() {
   const [serverState, setServerState] = React.useState<string>("Loading...");
   const [messageText, setMessageText] = React.useState<string>("");
   const userName = useSelector((state: RootState) => state.user.name);
   const dispatch = useDispatch();
+  const counter = useSelector((state: RootState) => state.counter.counter);
   const [chosenUserName, setChosenUserName] = React.useState<string>("");
   const [disableButton, setDisableButton] = React.useState<boolean>(true);
   const [inputFieldEmpty, setInputFieldEmpty] = React.useState<boolean>(true);
@@ -61,7 +63,9 @@ function MainComponent() {
       sender: userName,
       text: messageText,
     };
-    ws.send(JSON.stringify(message));
+    for (let i = 0; i < counter; i++) {
+      ws.send(JSON.stringify(message));
+    }
     setMessageText("");
     setInputFieldEmpty(true);
   };
@@ -88,6 +92,18 @@ function MainComponent() {
         </View>
       ) : (
         <>
+          <View style={styles.center}>
+            <Text style={{ color: Colors[colorScheme].text }}>
+              Repeat message: {counter}
+            </Text>
+          </View>
+          <View style={styles.center}>
+            <Button
+              onPress={() => dispatch(increament())}
+              title={"Increament"}
+            />
+            <Button onPress={() => dispatch(decrement())} title={"Decrement"} />
+          </View>
           <View style={styles.statusBar}>
             <Text style={{ color: Colors[colorScheme].text }}>
               {serverState}
@@ -160,6 +176,12 @@ const createStyles = (color: keyof typeof Colors) => {
       backgroundColor: Colors[color].backgroundChat,
       padding: 5,
       flexGrow: 1,
+    },
+    center: {
+      // alignContent: "center",
+      alignSelf: "center",
+      flexDirection: "row",
+      paddingBottom: 4,
     },
   });
 };
